@@ -12,11 +12,7 @@ if (Meteor.isClient) {
     "submit .add-task": function(event){
       var name = event.target.name.value;
 
-      Tasks.insert({
-        name: name,
-        createdAt: new Date()
-
-      });
+      Meteor.call('addTask', name);
 
       event.target.name.value = '';
       return false;
@@ -24,7 +20,7 @@ if (Meteor.isClient) {
 
     "click .delete-task": function(event){
       if(confirm('Delete Task?')){
-        Tasks.remove(this._id);
+        Meteor.call('deleteTask', this._id);
       }
 
 
@@ -37,3 +33,23 @@ if (Meteor.isClient) {
 if (Meteor.isServer) {
 
 }
+
+Meteor.methods({
+  addTask: function(name){
+    if(!Meteor.userId()){
+      throw new Meteor.Error('No Access');
+    }
+
+    Tasks.insert({
+      name: name,
+      createdAt: new Date(),
+      userId: Meteor.userId()
+
+    });
+
+  },
+
+  deleteTask: function(taskId){
+    Tasks.remove(taskId);
+  }
+});
